@@ -19,7 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `htbeauty`
 --
-
+CREATE DATABASE IF NOT EXISTS `htbeauty` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `htbeauty`;
 -- --------------------------------------------------------
 
 --
