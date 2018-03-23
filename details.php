@@ -10,16 +10,21 @@
 		<thead> 
 			<tr> 
 				<th>ID</th>     				
-				<th>Email</th> 
+				<th>Sản phẩm</th> 
 				 
-				<th>Tổng giá</th>
-				<th>Chi tiết</th>
 			</tr> 
 		</thead> 
 		<tbody> 
 			<?php
+
+				if(isset($_GET["id"])){
+					$id = $_GET['id'];
+				}else{
+					$id = '';
+				}
+				
 				$num_rec_per_page=10;
-			
+				
 				$conn = new mysqli("localhost", "root", "", "htbeauty");
 				if ($conn->connect_error) {
   					echo 'loi';
@@ -28,8 +33,12 @@
 				if (isset($_GET["page"])) { $page  = $_GET["page"]; } else { $page=1; }; 
 				$start_from = ($page-1) * $num_rec_per_page; 
 		
-				$sql="select * from tblproducts LIMIT $start_from, $num_rec_per_page ";
+				$sql="select tblproducts.ID, product_name from tblproducts, tblproduct_details 
+					where tblproducts.ID = tblproduct_details.ID
+					and tblproducts.ID = '" . $id . "'" . 
+					"LIMIT $start_from, $num_rec_per_page ";
 				//$query=mysql_query($sql);
+				//echo $sql;
 				$result = $conn->query($sql);
 
 				while($row = $result->fetch_assoc())
@@ -38,10 +47,9 @@
 			?>	
 			<tr >
 				<td><?echo  $row['ID']?></td> 
-				<td><?echo $row['email']?></td> 
+				<td><?echo $row['product_name']?></td> 
 				
-				<td><?echo $row['fee'] ?></td> 
-				<td><a href='details.php?id=<?echo  $row['ID']?>'><input type="image" src="images/icn_edit.png" title="Chi tiết"></a></td>
+				
 			</tr> 
 			<?
 				}

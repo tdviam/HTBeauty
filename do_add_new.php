@@ -39,6 +39,7 @@
 			//	VALUES('$rowID')";
 			for ($row = 2; $row <= $lastRow; $row++) {
 				$rowID = $worksheet->getCell('A'.$row)->getValue();
+				$temp_id = str_replace('#', '', $rowID);
 				$rowEmail = $worksheet->getCell('B'.$row)->getValue();
 				$rowProductName = $worksheet->getCell('T'.$row)->getValue();
 				$rowFee = $worksheet->getCell('M'.$row)->getValue();
@@ -49,7 +50,7 @@
 			 		//echo $arrlength;
 			 		for($i = 0; $i < $arrlength; $i++) {
     					//echo $listid[$i];
-    					if($listid[$i] == $rowID.'@@'.$rowEmail.'@@'.$rowFee){
+    					if($listid[$i] == $temp_id.'@@'.$rowEmail.'@@'.$rowFee){
     						//echo $rowID;
     						$existed = true;
     						break;
@@ -59,10 +60,10 @@
 				}
 				if($existed == false){
 					//echo $rowID;
-				 	array_push($listid, $rowID.'@@'.$rowEmail.'@@'.$rowFee);
+				 	array_push($listid, $temp_id.'@@'.$rowEmail.'@@'.$rowFee);
 				}		 	
 			 	
-			 	$sql .= "('$rowID', '$rowProductName')";
+			 	$sql .= "('$temp_id', '$rowProductName')";
 			 	if($row < $lastRow){
 			 		$sql .= ",";
 			 	}
@@ -90,6 +91,8 @@
 			}
 			
 			mysql_close($conn);
+			header('Location: index.php');
+ 			exit;
 		}
 	}	
 ?>
