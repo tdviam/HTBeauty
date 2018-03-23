@@ -1,69 +1,95 @@
 <?
 	include "common/connect.php";
-?>
-<?
-	$sql="select max(ID) as max_id from tblnews";
-	$query = mysql_query($sql); //run the query
+	require_once "Classes/PHPExcel.php";
 
-	$row=mysql_fetch_row($query);
-	$max_id = $row[0]+1;
-
-	$target_dir = "img/";
+	$target_dir = "tmp/";
 	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 	$uploadOk = 1;
 	$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
 	
 	// Allow certain file formats
-	if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-	&& $imageFileType != "gif" ) {
-	    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+	if($imageFileType != "xls" && $imageFileType != "xlsx" ) {
+	    echo "Sorry, only XLS & XLSX files are allowed.";
 	    $uploadOk = 0;
 	}
 	
-	if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-		$uploadOk = 1;
-	} else {
-		$uploadOk = 0;
-   	}
+	if($uploadOk == 1){
+		if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+			$uploadOk = 1;
+		} else {
+			$uploadOk = 0;
+   		}
+	}
 	
 	if($uploadOk == 0){
 		echo $_FILES["fileToUpload"]["name"]." was uploaded FAIL.";
 	} else {
-	
+			
 		if(isset($_POST['add'])){
-			$title = ($_POST['title']);
-			$title_en = ($_POST['title_en']);
-			$brief_content = ($_POST['brief_content']);
-			$brief_content_en = ($_POST['brief_content_en']);
-			$content = ($_POST['content']);
-			$content_en = ($_POST['content_en']);
-			$publish = ($_POST['publish']);
-			$type = ($_POST['service']);
+			$excelReader = PHPExcel_IOFactory::createReaderForFile($target_file);
+			$excelObj = $excelReader->load($target_file);
+			$worksheet = $excelObj->getSheet(0);
+			$lastRow = $worksheet->getHighestRow();
+			//$row = 2;
 			
-			if($title_en == ''){
-				$title_en = $title;
-			}
 			
-			if($brief_content_en == ''){
-				$brief_content_en = $brief_content;
-			}
+			$listid = array();
+			$sql = "INSERT INTO tblproduct_details(ID, product_name) VALUES";
+			//$sql = "INSERT INTO tblproducts(ID) 
+			//	VALUES('$rowID')";
+			for ($row = 2; $row <= $lastRow; $row++) {
+				$rowID = $worksheet->getCell('A'.$row)->getValue();
+				$rowEmail = $worksheet->getCell('B'.$row)->getValue();
+				$rowProductName = $worksheet->getCell('T'.$row)->getValue();
+				$rowFee = $worksheet->getCell('M'.$row)->getValue();
+			 	
+			 	$arrlength = count($listid);
+			 	$existed = false;
+			 	if($arrlength > 0){
+			 		//echo $arrlength;
+			 		for($i = 0; $i < $arrlength; $i++) {
+    					//echo $listid[$i];
+    					if($listid[$i] == $rowID.'@@'.$rowEmail.'@@'.$rowFee){
+    						//echo $rowID;
+    						$existed = true;
+    						break;
+    					}
+    					
+					}
+				}
+				if($existed == false){
+					//echo $rowID;
+				 	array_push($listid, $rowID.'@@'.$rowEmail.'@@'.$rowFee);
+				}		 	
+			 	
+			 	$sql .= "('$rowID', '$rowProductName')";
+			 	if($row < $lastRow){
+			 		$sql .= ",";
+			 	}
+			}	
 			
-			if($content_en == ''){
-				$content_en = $content;
-			}
-
-			$sql = "INSERT INTO tblNews ".
-				   "(ID, TITLE, TITLE_EN, CONTENT_BRIEF, CONTENT_BRIEF_EN, CONTENT, CONTENT_EN, PUBLISH_DATE, PUBLISH, NEW_TYPE, IMAGE_URL) ".
-				   "VALUES($max_id, '$title', '$title_en', '$brief_content', '$brief_content_en', '$content', '$content_en', NOW() ,$publish,$type, '$target_file')";
-
 			$retval = mysql_query( $sql, $conn );
-			if(! $retval )
-			{
-			  die('Could not enter data: ' . mysql_error());
+			if(! $retval ){
+				die('Could not enter data: ' . mysql_error());
 			}
+			
+			$sql1 = "INSERT INTO tblproducts(ID, email, fee) VALUES ";
+			$arrlength = count($listid);
+			for($i = 0; $i < $arrlength; $i++) {
+    			$splitID = explode("@@", $listid[$i]);
+    			
+    			$sql1 .= "('$splitID[0]', '$splitID[1]', '$splitID[2]')";
+			 	if($i < $arrlength-1){
+			 		$sql1 .= ",";
+			 	}	
+			}
+			echo $sql1;
+			$retval = mysql_query( $sql1, $conn );
+			if(! $retval ){
+				die('Could not enter data: ' . mysql_error());
+			}
+			
 			mysql_close($conn);
-			header('Location: index.php');
-			exit;
 		}
 	}	
 ?>

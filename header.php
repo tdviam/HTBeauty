@@ -84,10 +84,10 @@ if(!isset($sess))
 	<aside id="sidebar" class="column">
 		
 		<hr/>
-		<h3>Bài viết</h3>
+		<h3>Danh sách đơn hàng</h3>
 		<ul >
-			<li class="icn_edit_article"><a href="index.php">Tất cả bài viết</a></li>
-			<li class="icn_new_article"><a href="add_new.php">Bài viết mới</a></li>
+			<li class="icn_edit_article"><a href="index.php">Tất cả</a></li>
+			<li class="icn_new_article"><a href="add_new.php">Upload</a></li>
 		</ul>
 		
 		<h3>Mật khẩu</h3>

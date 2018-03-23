@@ -144,7 +144,7 @@ button:active{
 <body>
 <?php
 	session_start();
-	$conn = new mysqli("localhost", "root", "", "celadon");
+	$conn = new mysqli("localhost", "root", "", "htbeauty");
 	if ($conn->connect_error) {
   		echo 'loi';
 	}
